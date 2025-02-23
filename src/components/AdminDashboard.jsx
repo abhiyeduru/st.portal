@@ -155,19 +155,29 @@ const AdminDashboard = () => {
 
       await addDoc(collection(db, 'students'), studentData);
 
+      // Create fees record
+      await addDoc(collection(db, 'fees'), {
+        studentId: userCredential.user.uid,
+        totalFees: Number(newStudent.totalFees),
+        paidFees: 0,
+        pendingFees: Number(newStudent.totalFees),
+        lastUpdated: new Date()
+      });
+
+      alert(`Student account created successfully!\nEmail: ${newStudent.email}\nPassword: ${newStudent.password}`);
+      
+      // Reset form and fetch updated data
       setNewStudent({
         name: '', rollNo: '', year: '', branch: '', 
         email: '', password: '', totalFees: ''
       });
-
       await Promise.all([
         fetchStudents(),
         fetchDashboardStats()
       ]);
-
-      alert('Student account created successfully!');
       
-      e.target.reset();
+      // Switch to manage students view
+      setActiveTab('manageStudents');
     } catch (error) {
       console.error('Error:', error);
       alert('Error creating student: ' + error.message);
@@ -230,30 +240,6 @@ const AdminDashboard = () => {
           required
         />
         <input
-          type="text"
-          placeholder="Roll Number"
-          value={newStudent.rollNo}
-          onChange={(e) => setNewStudent({...newStudent, rollNo: e.target.value})}
-          className="w-full p-3 border rounded dark:bg-gray-700 dark:text-white"
-          required
-        />
-        <input
-          type="text"
-          placeholder="Year"
-          value={newStudent.year}
-          onChange={(e) => setNewStudent({...newStudent, year: e.target.value})}
-          className="w-full p-3 border rounded dark:bg-gray-700 dark:text-white"
-          required
-        />
-        <input
-          type="text"
-          placeholder="Branch"
-          value={newStudent.branch}
-          onChange={(e) => setNewStudent({...newStudent, branch: e.target.value})}
-          className="w-full p-3 border rounded dark:bg-gray-700 dark:text-white"
-          required
-        />
-        <input
           type="email"
           placeholder="Email"
           value={newStudent.email}
@@ -269,6 +255,38 @@ const AdminDashboard = () => {
           className="w-full p-3 border rounded dark:bg-gray-700 dark:text-white"
           required
         />
+        <input
+          type="text"
+          placeholder="Roll Number"
+          value={newStudent.rollNo}
+          onChange={(e) => setNewStudent({...newStudent, rollNo: e.target.value})}
+          className="w-full p-3 border rounded dark:bg-gray-700 dark:text-white"
+          required
+        />
+        <select
+          value={newStudent.year}
+          onChange={(e) => setNewStudent({...newStudent, year: e.target.value})}
+          className="w-full p-3 border rounded dark:bg-gray-700 dark:text-white"
+          required
+        >
+          <option value="">Select Year</option>
+          <option value="1">1st Year</option>
+          <option value="2">2nd Year</option>
+          <option value="3">3rd Year</option>
+          <option value="4">4th Year</option>
+        </select>
+        <select
+          value={newStudent.branch}
+          onChange={(e) => setNewStudent({...newStudent, branch: e.target.value})}
+          className="w-full p-3 border rounded dark:bg-gray-700 dark:text-white"
+          required
+        >
+          <option value="">Select Branch</option>
+          <option value="CSE">Computer Science</option>
+          <option value="ECE">Electronics</option>
+          <option value="MECH">Mechanical</option>
+          <option value="CIVIL">Civil</option>
+        </select>
         <input
           type="number"
           placeholder="Total Fees"
@@ -290,26 +308,41 @@ const AdminDashboard = () => {
 
   const renderManageStudents = () => (
     <div className="overflow-x-auto">
+      <div className="mb-4 flex justify-between items-center">
+        <h2 className="text-2xl font-bold text-gray-800 dark:text-white">Manage Students</h2>
+        <button
+          onClick={() => setActiveTab('createStudent')}
+          className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+        >
+          + Add New Student
+        </button>
+      </div>
       <table className="min-w-full bg-white dark:bg-gray-700 shadow-md rounded-lg">
         <thead className="bg-gray-100 dark:bg-gray-600">
           <tr>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-200 uppercase tracking-wider">Roll No</th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-200 uppercase tracking-wider">Name</th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-200 uppercase tracking-wider">Email</th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-200 uppercase tracking-wider">Year</th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-200 uppercase tracking-wider">Branch</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-200 uppercase tracking-wider">Total Fees</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-200 uppercase tracking-wider">Paid</th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-200 uppercase tracking-wider">Actions</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-200 dark:divide-gray-500">
           {students.map((student) => (
             <tr key={student.id} className="hover:bg-gray-50 dark:hover:bg-gray-600">
+              <td className="px-6 py-4 whitespace-nowrap text-gray-900 dark:text-gray-200">{student.rollNo}</td>
               <td className="px-6 py-4 whitespace-nowrap text-gray-900 dark:text-gray-200">{student.name}</td>
               <td className="px-6 py-4 whitespace-nowrap text-gray-900 dark:text-gray-200">{student.email}</td>
-              <td className="px-6 py-4 whitespace-nowrap text-gray-900 dark:text-gray-200">{student.year}</td>
+              <td className="px-6 py-4 whitespace-nowrap text-gray-900 dark:text-gray-200">{student.year} Year</td>
               <td className="px-6 py-4 whitespace-nowrap text-gray-900 dark:text-gray-200">{student.branch}</td>
+              <td className="px-6 py-4 whitespace-nowrap text-gray-900 dark:text-gray-200">₹{student.totalFees}</td>
+              <td className="px-6 py-4 whitespace-nowrap text-gray-900 dark:text-gray-200">₹{student.paidFees || 0}</td>
               <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                 <button
-                  onClick={() => setEditingStudent({ id: student.id })}
+                  onClick={() => handleEditStudent(student)}
                   className="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 mr-4"
                 >
                   Edit

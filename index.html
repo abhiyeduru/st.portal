@@ -150,6 +150,40 @@
       margin-bottom: 24px;
       font-size: 24px;
     }
+
+    .student-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      margin: 20px auto;
+      max-width: 900px;
+    }
+
+    .fees-card {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .fees-card h3 {
+      color: #333;
+      margin-bottom: 0.5rem;
+    }
+
+    .fees-card .amount {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #2563eb;
+    }
+
+    .fees-card.pending .amount {
+      color: #dc2626;
+    }
+
+    .fees-card.paid .amount {
+      color: #16a34a;
+    }
   </style>
 </head>
 <body>
@@ -208,72 +242,138 @@
     
     <div class="admin-actions">
       <button id="create-student-btn">Create Student Account</button>
-      <button id="manage-students-btn">Manage Students</button>
-      <button id="view-payments-btn">View Payments</button>
+      <button id="manage-students-btn" onclick="window.location.href='admin-manage-students.html'">Manage Students</button>
+      <button id="view-payments-btn" onclick="window.location.href='admin-payments.html'">View Payments</button>
       <button id="logout-btn">Logout</button>
     </div>
 
-    <!-- Student Creation Form -->
-    <div id="create-student-form" class="hidden">
-      <h2>Create New Student</h2>
-      <form id="student-form">
-        <input type="text" id="student-name" placeholder="Student Name" required>
-        <input type="email" id="student-email" placeholder="Email" required>
-        <input type="password" id="student-password" placeholder="Password" required>
-        <input type="text" id="student-year" placeholder="Year" required>
-        <input type="text" id="student-branch" placeholder="Branch" required>
-        <input type="number" id="student-fees" placeholder="Total Fees" required>
-        <input type="file" id="student-photo" accept="image/*">
-        <div class="fees-section border p-4 rounded mt-4">
-          <h3>Fixed Fees Structure</h3>
-          <div class="grid grid-cols-2 gap-4">
-            <div>
-              <label>Tuition Fees</label>
-              <input type="number" id="tuition-fees" required>
-            </div>
-            <div>
-              <label>Hostel Fees</label>
-              <input type="number" id="hostel-fees" required>
-            </div>
-            <div>
-              <label>Exam Fees</label>
-              <input type="number" id="exam-fees" required>
-            </div>
-            <div>
-              <label>Other Fees</label>
-              <input type="number" id="other-fees">
-            </div>
+    <!-- Only keep the create student form in the main admin page -->
+    <div id="create-student-form">
+      <h2 class="text-2xl font-bold mb-6">Create New Student</h2>
+      <form id="student-form" class="max-w-md mx-auto bg-white p-6 rounded-lg shadow-md">
+        <div class="space-y-4">
+          <div>
+            <input 
+              type="text" 
+              id="student-name" 
+              placeholder="Student Name" 
+              class="w-full p-3 border rounded focus:border-blue-500 focus:outline-none"
+              required
+            >
           </div>
+          <div>
+            <input 
+              type="email" 
+              id="student-email" 
+              placeholder="Email" 
+              class="w-full p-3 border rounded focus:border-blue-500 focus:outline-none"
+              required
+            >
+          </div>
+          <div>
+            <input 
+              type="password" 
+              id="student-password" 
+              placeholder="Password" 
+              class="w-full p-3 border rounded focus:border-blue-500 focus:outline-none"
+              required
+            >
+          </div>
+          <div>
+            <input 
+              type="text" 
+              id="student-rollno" 
+              placeholder="Roll Number" 
+              class="w-full p-3 border rounded focus:border-blue-500 focus:outline-none"
+              required
+            >
+          </div>
+          <div>
+            <select 
+              id="student-year" 
+              class="w-full p-3 border rounded focus:border-blue-500 focus:outline-none"
+              required
+            >
+              <option value="">Select Year</option>
+              <option value="1">1st Year</option>
+              <option value="2">2nd Year</option>
+              <option value="3">3rd Year</option>
+              <option value="4">4th Year</option>
+            </select>
+          </div>
+          <div>
+            <select 
+              id="student-branch" 
+              class="w-full p-3 border rounded focus:border-blue-500 focus:outline-none"
+              required
+            >
+              <option value="">Select Branch</option>
+              <option value="CSE">Computer Science</option>
+              <option value="ECE">Electronics</option>
+              <option value="MECH">Mechanical</option>
+              <option value="CIVIL">Civil</option>
+            </select>
+          </div>
+          <div>
+            <input 
+              type="number" 
+              id="student-fees" 
+              placeholder="Total Fees" 
+              class="w-full p-3 border rounded focus:border-blue-500 focus:outline-none"
+              required
+            >
+          </div>
+          <button 
+            type="submit" 
+            class="w-full bg-blue-500 text-white p-3 rounded hover:bg-blue-600 transition-colors"
+            id="create-student-submit"
+          >
+            Create Student Account
+          </button>
         </div>
-        <button type="submit">Create Account</button>
       </form>
-    </div>
-
-    <!-- Payment History -->
-    <div id="payment-history" class="hidden">
-      <h2>Payment History</h2>
-      <table id="payments-table" class="w-full mt-4">
-        <thead>
-          <tr>
-            <th>Date</th>
-            <th>Student Name</th>
-            <th>Amount</th>
-            <th>Type</th>
-            <th>Status</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody id="payments-list"></tbody>
-      </table>
     </div>
   </div>
 
   <!-- Update Student Dashboard section -->
   <div id="student-dashboard" class="hidden">
     <h1>Student Dashboard</h1>
-    <button id="pay-fees-btn">Pay Fees</button>
-    <button id="view-dues-btn">View Dues</button>
-    <button id="student-logout-btn">Logout</button>
+    <div class="student-stats">
+      <div class="fees-card">
+        <h3>Total Fees</h3>
+        <p class="amount" id="student-total-fees">₹0</p>
+      </div>
+      <div class="fees-card paid">
+        <h3>Paid Fees</h3>
+        <p class="amount" id="student-paid-fees">₹0</p>
+      </div>
+      <div class="fees-card pending">
+        <h3>Pending Dues</h3>
+        <p class="amount" id="student-pending-fees">₹0</p>
+      </div>
+    </div>
+
+    <div class="fees-breakdown mt-8">
+      <h2>Fees Breakdown</h2>
+      <table class="min-w-full bg-white shadow-md rounded-lg mt-4 max-w-2xl mx-auto">
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Amount</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+          </tr>
+        </thead>
+        <tbody id="fees-breakdown-list" class="divide-y divide-gray-200">
+          <!-- Fees breakdown will be populated here -->
+        </tbody>
+      </table>
+    </div>
+
+    <div class="flex justify-center gap-4 mt-8">
+      <button id="pay-fees-btn" class="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600">Pay Fees</button>
+      <button id="view-dues-btn" class="bg-gray-500 text-white px-6 py-2 rounded hover:bg-gray-600">View Payment History</button>
+      <button id="student-logout-btn" class="bg-red-500 text-white px-6 py-2 rounded hover:bg-red-600">Logout</button>
+    </div>
   </div>
 
   <!-- Payment Page -->
@@ -290,6 +390,13 @@
         <option value="hostel">Hostel</option>
         <option value="exam">Exam</option>
       </select>
+      <input 
+        type="number" 
+        id="amount" 
+        placeholder="Amount" 
+        class="w-full p-2 border rounded"
+        required
+      >
       <div class="upi-payment-section bg-gray-100 p-4 rounded mt-4">
         <h3>Payment Details</h3>
         <p class="my-2">UPI ID: 9182146476@ybl</p>
@@ -340,19 +447,22 @@
     // Import Firebase modules
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.1.0/firebase-app.js";
     import { getAuth, signInWithEmailAndPassword, signOut, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.1.0/firebase-auth.js";
-    import { getFirestore, collection, addDoc, serverTimestamp, getDocs } from "https://www.gstatic.com/firebasejs/10.1.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, serverTimestamp, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.1.0/firebase-firestore.js";
     import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.1.0/firebase-storage.js";
+    import { CLOUDINARY_URL, CLOUDINARY_UPLOAD_PRESET } from './cloudinary-config.js';
 
     // Firebase configuration
    // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: "AIzaSyC6uqUrnMPvO4YHnvZRPb3y7HudGUXK350",
-  authDomain: "nnnnnn-69ba9.firebaseapp.com",
-  projectId: "nnnnnn-69ba9",
-  storageBucket: "nnnnnn-69ba9.firebasestorage.app",
-  messagingSenderId: "483428861523",
-  appId: "1:483428861523:web:fedc2ff6343bf50d7128a6",
-  measurementId: "G-ZD8SNLG7FC"
+  apiKey: "AIzaSyD40N4reekEwZycvg5ZUP8wcJKmCJNpQFo",
+  authDomain: "feeiportal.firebaseapp.com",
+  databaseURL: "https://feeiportal-default-rtdb.firebaseio.com",
+  projectId: "feeiportal",
+  storageBucket: "feeiportal.firebasestorage.app",
+  messagingSenderId: "436075593718",
+  appId: "1:436075593718:web:2ce0f6fbc4661c980d51d7",
+  measurementId: "G-HZ1C9Z3Y2Z"
 };
 
     // Initialize Firebase and make instances globally available
@@ -428,6 +538,7 @@ const firebaseConfig = {
           await signInWithEmailAndPassword(auth, email, password);
           loginPage.classList.add('hidden');
           studentDashboard.classList.remove('hidden');
+          await loadStudentFeesData(); // Load fees data after successful login
         } else {
           throw new Error('Invalid credentials');
         }
@@ -458,37 +569,100 @@ const firebaseConfig = {
     const paymentForm = document.getElementById('payment-form');
     paymentForm.addEventListener('submit', async (e) => {
       e.preventDefault();
-      try {
-        const transactionId = document.getElementById('upi-transaction-id').value;
-        const screenshot = document.getElementById('payment-screenshot').files[0];
-        
-        // Upload payment screenshot
-        const screenshotRef = ref(storage, `payments/${auth.currentUser.uid}/${new Date().getTime()}`);
-        await uploadBytes(screenshotRef, screenshot);
-        const screenshotURL = await getDownloadURL(screenshotRef);
+      const submitBtn = document.getElementById('submit-payment-btn');
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Processing...';
 
-        // Save payment record
-        const paymentData = {
-          studentId: auth.currentUser.uid,
+      try {
+        // Get all required fields
+        const data = {
           amount: document.getElementById('amount').value,
-          feesType: document.getElementById('fees-type').value,
-          transactionId,
-          screenshotURL,
-          timestamp: serverTimestamp(),
-          status: 'pending',
-          upiId: '9182146476@ybl'
+          transactionId: document.getElementById('upi-transaction-id').value,
+          screenshot: document.getElementById('payment-screenshot').files[0],
+          name: document.getElementById('name').value,
+          feesType: document.getElementById('fees-type').value
         };
 
-        const paymentRef = await addDoc(collection(db, 'payments'), paymentData);
+        // Validate all required fields
+        if (!data.amount || !data.transactionId || !data.screenshot || !data.name) {
+          throw new Error('Please fill all required fields');
+        }
 
-        // Show receipt
+        // Validate amount
+        if (isNaN(data.amount) || data.amount <= 0) {
+          throw new Error('Please enter a valid amount');
+        }
+
+        // Validate file size (max 5MB)
+        if (data.screenshot.size > 5 * 1024 * 1024) {
+          throw new Error('Screenshot file size must be less than 5MB');
+        }
+
+        console.log('Processing payment...', data);
+
+        // Upload screenshot first
+        const formData = new FormData();
+        formData.append('file', data.screenshot);
+        formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+
+        const cloudinaryResponse = await fetch(CLOUDINARY_URL, {
+          method: 'POST',
+          body: formData
+        });
+
+        if (!cloudinaryResponse.ok) {
+          throw new Error('Failed to upload image to Cloudinary');
+        }
+
+        const cloudinaryData = await cloudinaryResponse.json();
+        const imageUrl = cloudinaryData.secure_url;
+
+        // Create payment record
+        const paymentData = {
+          studentId: auth.currentUser.uid,
+          amount: Number(data.amount),
+          feesType: data.feesType,
+          transactionId: data.transactionId,
+          screenshotURL: imageUrl,
+          timestamp: serverTimestamp(),
+          status: 'pending',
+          studentName: data.name,
+          studentEmail: auth.currentUser.email
+        };
+
+        // Save to Firestore
+        const paymentRef = await addDoc(collection(db, 'payments'), paymentData);
+        console.log('Payment record created:', paymentRef.id);
+
+        // Update student's paid fees
+        const studentsRef = collection(db, 'students');
+        const studentQuery = query(studentsRef, where('uid', '==', auth.currentUser.uid));
+        const studentSnap = await getDocs(studentQuery);
+        
+        if (!studentSnap.empty) {
+          const studentDoc = studentSnap.docs[0];
+          const currentPaidFees = studentDoc.data().paidFees || 0;
+          await updateDoc(doc(db, 'students', studentDoc.id), {
+            paidFees: currentPaidFees + Number(data.amount)
+          });
+        }
+
+        // Show success receipt
         showReceipt({
           ...paymentData,
           receiptId: paymentRef.id,
           date: new Date().toLocaleDateString()
         });
+
+        // Reset form
+        paymentForm.reset();
+
       } catch (error) {
-        alert('Payment submission failed: ' + error.message);
+        console.error('Payment error:', error);
+        alert(error.message);
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Submit Payment';
       }
     });
 
@@ -548,6 +722,7 @@ const firebaseConfig = {
       paymentPage.classList.add('hidden');
       receiptPage.classList.add('hidden');
       studentDashboard.classList.remove('hidden');
+      loadStudentFeesData();
     });
 
     // Show create student form
@@ -558,66 +733,94 @@ const firebaseConfig = {
     // Handle student creation
     studentForm.addEventListener('submit', async (e) => {
       e.preventDefault();
-      
+      const submitBtn = document.getElementById('create-student-submit');
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Creating...';
+
       try {
-        const name = document.getElementById('student-name').value;
-        const email = document.getElementById('student-email').value;
-        const password = document.getElementById('student-password').value;
-        const year = document.getElementById('student-year').value;
-        const branch = document.getElementById('student-branch').value;
-        const totalFees = document.getElementById('student-fees').value;
-        const photoFile = document.getElementById('student-photo').files[0];
-
-        // Create authentication account using the global auth instance
-        const userCredential = await createUserWithEmailAndPassword(window.auth, email, password);
-        
-        // Upload photo if provided
-        let photoURL = '';
-        if (photoFile) {
-          const photoRef = ref(window.storage, `students/${userCredential.user.uid}/profile`);
-          await uploadBytes(photoRef, photoFile);
-          photoURL = await getDownloadURL(photoRef);
-        }
-
-        // Create student profile using the global db instance
-        const feesStructure = {
-          tuition: Number(document.getElementById('tuition-fees').value),
-          hostel: Number(document.getElementById('hostel-fees').value),
-          exam: Number(document.getElementById('exam-fees').value),
-          other: Number(document.getElementById('other-fees').value || 0)
+        // Collect form data
+        const studentData = {
+          name: document.getElementById('student-name').value.trim(),
+          email: document.getElementById('student-email').value.trim(),
+          password: document.getElementById('student-password').value,
+          rollNo: document.getElementById('student-rollno').value.trim(),
+          year: document.getElementById('student-year').value,
+          branch: document.getElementById('student-branch').value,
+          totalFees: Number(document.getElementById('student-fees').value)
         };
 
-        await addDoc(collection(window.db, 'students'), {
+        // Validate form data
+        for (const [key, value] of Object.entries(studentData)) {
+          if (!value) {
+            throw new Error(`${key.charAt(0).toUpperCase() + key.slice(1)} is required`);
+          }
+        }
+
+        if (studentData.totalFees <= 0) {
+          throw new Error('Total fees must be greater than 0');
+        }
+
+        console.log('Creating student account...', { ...studentData, password: '***' });
+
+        // First create auth account
+        const userCredential = await createUserWithEmailAndPassword(
+          auth, 
+          studentData.email, 
+          studentData.password
+        );
+
+        console.log('Auth account created:', userCredential.user.uid);
+
+        // Add additional data before storing in Firestore
+        const firestoreData = {
+          ...studentData,
           uid: userCredential.user.uid,
-          name,
-          email,
-          year,
-          branch,
-          totalFees: Object.values(feesStructure).reduce((a, b) => a + b, 0),
-          photoURL,
-          createdAt: new Date(),
+          createdAt: serverTimestamp(),
           status: 'active',
-          feesStructure
-        });
-
-        // Create fees record
-        await addDoc(collection(window.db, 'fees'), {
-          studentId: userCredential.user.uid,
-          totalFees: Number(totalFees),
           paidFees: 0,
-          pendingFees: Number(totalFees),
-          lastUpdated: new Date()
+          pendingFees: studentData.totalFees
+        };
+
+        // Remove password before storing
+        delete firestoreData.password;
+
+        // Create student document
+        const studentRef = await addDoc(collection(db, 'students'), firestoreData);
+        console.log('Student document created:', studentRef.id);
+
+        // Create initial fees record
+        await addDoc(collection(db, 'fees'), {
+          studentId: userCredential.user.uid,
+          studentName: studentData.name,
+          totalFees: studentData.totalFees,
+          paidFees: 0,
+          pendingFees: studentData.totalFees,
+          lastUpdated: serverTimestamp()
         });
 
-        alert(`Student account created successfully!\nEmail: ${email}\nPassword: ${password}`);
+        alert(`Student account created successfully!\nEmail: ${studentData.email}`);
         studentForm.reset();
+        await updateDashboardStats();
         createStudentForm.classList.add('hidden');
-        
-        // Update dashboard stats
-        updateDashboardStats();
+
       } catch (error) {
         console.error('Error creating student:', error);
-        alert('Error creating student: ' + error.message);
+        let errorMessage = 'Failed to create student: ';
+
+        if (error.code === 'auth/email-already-in-use') {
+          errorMessage += 'Email is already registered';
+        } else if (error.code === 'auth/invalid-email') {
+          errorMessage += 'Invalid email format';
+        } else if (error.code === 'auth/weak-password') {
+          errorMessage += 'Password must be at least 6 characters';
+        } else {
+          errorMessage += error.message;
+        }
+
+        alert(errorMessage);
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Create Student Account';
       }
     });
 
@@ -625,19 +828,23 @@ const firebaseConfig = {
     async function updateDashboardStats() {
       try {
         const studentsSnap = await getDocs(collection(db, 'students'));
-        const paymentsSnap = await getDocs(collection(db, 'payments'));
+        const feesSnap = await getDocs(collection(db, 'fees'));
         
         let totalStudents = 0;
         let totalFees = 0;
-        
+        let totalPendingFees = 0;
+
         studentsSnap.forEach(() => totalStudents++);
-        paymentsSnap.forEach(doc => {
-          const payment = doc.data();
-          totalFees += Number(payment.amount || 0);
+        
+        feesSnap.forEach(doc => {
+          const fees = doc.data();
+          totalFees += fees.paidFees || 0;
+          totalPendingFees += fees.pendingFees || 0;
         });
 
         document.getElementById('total-students').textContent = totalStudents;
         document.getElementById('total-fees').textContent = `₹${totalFees}`;
+        document.getElementById('pending-dues').textContent = `₹${totalPendingFees}`;
       } catch (error) {
         console.error('Error updating stats:', error);
       }
@@ -683,6 +890,53 @@ const firebaseConfig = {
       });
     }
 
+    // Add function to load and display students
+    async function loadStudents() {
+      try {
+        const studentsSnap = await getDocs(collection(db, 'students'));
+        const studentsList = document.getElementById('students-list');
+        studentsList.innerHTML = '';
+
+        studentsSnap.forEach(doc => {
+          const student = doc.data();
+          const row = document.createElement('tr');
+          row.className = 'hover:bg-gray-50';
+          row.innerHTML = `
+            <td class="px-6 py-4 whitespace-nowrap">${student.rollNo}</td>
+            <td class="px-6 py-4 whitespace-nowrap">${student.name}</td>
+            <td class="px-6 py-4 whitespace-nowrap">${student.email}</td>
+            <td class="px-6 py-4 whitespace-nowrap">${student.year} Year</td>
+            <td class="px-6 py-4 whitespace-nowrap">${student.branch}</td>
+            <td class="px-6 py-4 whitespace-nowrap">₹${student.totalFees}</td>
+            <td class="px-6 py-4 whitespace-nowrap">₹${student.paidFees || 0}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm">
+              <button 
+                onclick="editStudent('${doc.id}')"
+                class="text-indigo-600 hover:text-indigo-900 mr-3"
+              >
+                Edit
+              </button>
+              <button 
+                onclick="deleteStudent('${doc.id}')"
+                class="text-red-600 hover:text-red-900"
+              >
+                Delete
+              </button>
+            </td>
+          `;
+          studentsList.appendChild(row);
+        });
+      } catch (error) {
+        console.error('Error loading students:', error);
+      }
+    }
+
+    // Initialize the manage students view when clicked
+    document.getElementById('manage-students-btn').addEventListener('click', () => {
+      document.getElementById('manage-students').classList.remove('hidden');
+      loadStudents();
+    });
+
     // Add QR code initialization
     function initializeQRCode() {
       const qrContainer = document.getElementById('qr-container');
@@ -704,6 +958,63 @@ const firebaseConfig = {
       initializeQRCode();
       // ... rest of your initialization code ...
     });
+
+    // Add this function to load student fees data
+    async function loadStudentFeesData() {
+      try {
+        const user = auth.currentUser;
+        if (!user) return;
+
+        const studentsRef = collection(db, 'students');
+        const studentQuery = query(studentsRef, where('uid', '==', user.uid));
+        const studentSnap = await getDocs(studentQuery);
+        
+        if (studentSnap.empty) {
+          console.error('No student data found');
+          return;
+        }
+
+        const studentData = studentSnap.docs[0].data();
+        
+        // Update the stats cards
+        document.getElementById('student-total-fees').textContent = `₹${studentData.totalFees}`;
+        document.getElementById('student-paid-fees').textContent = `₹${studentData.paidFees || 0}`;
+        document.getElementById('student-pending-fees').textContent = 
+          `₹${studentData.totalFees - (studentData.paidFees || 0)}`;
+
+        // Populate fees breakdown
+        const breakdownList = document.getElementById('fees-breakdown-list');
+        breakdownList.innerHTML = '';
+
+        // Add fees breakdown rows
+        const feesTypes = [
+          { type: 'Tuition Fees', amount: studentData.totalFees * 0.7 },
+          { type: 'Exam Fees', amount: studentData.totalFees * 0.15 },
+          { type: 'Development Fees', amount: studentData.totalFees * 0.15 }
+        ];
+
+        feesTypes.forEach(fee => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td class="px-6 py-4 whitespace-nowrap">${fee.type}</td>
+            <td class="px-6 py-4 whitespace-nowrap">₹${fee.amount}</td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <span class="px-2 py-1 text-xs rounded-full ${
+                studentData.paidFees >= fee.amount
+                  ? 'bg-green-100 text-green-800'
+                  : 'bg-red-100 text-red-800'
+              }">
+                ${studentData.paidFees >= fee.amount ? 'Paid' : 'Pending'}
+              </span>
+            </td>
+          `;
+          breakdownList.appendChild(row);
+        });
+
+      } catch (error) {
+        console.error('Error loading student fees:', error);
+      }
+    }
   </script>
 </body>
 </html>

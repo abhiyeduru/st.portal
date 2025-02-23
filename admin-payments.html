@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Payment History - Admin Dashboard</title>
+  <style>
+    /* Copy relevant styles from index.html */
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    
+    .admin-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .back-button {
+      padding: 8px 16px;
+      background-color: #4A90E2;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    th, td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+
+    th {
+      background-color: #f5f5f5;
+    }
+
+    .payment-screenshot {
+      max-width: 200px;
+      cursor: pointer;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.8);
+      z-index: 1000;
+    }
+
+    .modal-content {
+      position: relative;
+      max-width: 90%;
+      max-height: 90%;
+      margin: 20px auto;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-image {
+      max-width: 100%;
+      max-height: 90vh;
+    }
+
+    .close-modal {
+      position: absolute;
+      top: -30px;
+      right: 0;
+      color: white;
+      font-size: 24px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="admin-header">
+    <h1>Payment History</h1>
+    <button class="back-button" onclick="window.location.href='index.html'">Back to Dashboard</button>
+  </div>
+
+  <table id="payments-table">
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Student Name</th>
+        <th>Amount</th>
+        <th>Type</th>
+        <th>Status</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody id="payments-list"></tbody>
+  </table>
+
+  <div id="imageModal" class="modal">
+    <div class="modal-content">
+      <span class="close-modal">&times;</span>
+      <img id="modalImage" class="modal-image" src="" alt="Payment Screenshot">
+    </div>
+  </div>
+
+  <script type="module">
+    // Import Firebase modules and configuration
+    // ... (copy Firebase initialization code from index.html)
+
+    // Function to load payment history
+    async function loadPaymentHistory() {
+      try {
+        const paymentsSnap = await getDocs(collection(db, 'payments'));
+        const paymentsList = document.getElementById('payments-list');
+        paymentsList.innerHTML = '';
+
+        paymentsSnap.forEach(doc => {
+          const payment = doc.data();
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${payment.timestamp.toDate().toLocaleDateString()}</td>
+            <td>${payment.studentName}</td>
+            <td>₹${payment.amount}</td>
+            <td>${payment.feesType}</td>
+            <td>${payment.status}</td>
+            <td>
+              <img 
+                src="${payment.screenshotURL}" 
+                alt="Payment Screenshot" 
+                class="payment-screenshot"
+                onclick="openImageModal('${payment.screenshotURL}')"
+              >
+            </td>
+            <td>
+              <button onclick="verifyPayment('${doc.id}')" class="bg-green-500 text-white p-1 rounded">
+                Verify
+              </button>
+            </td>
+          `;
+          paymentsList.appendChild(row);
+        });
+      } catch (error) {
+        console.error('Error loading payments:', error);
+      }
+    }
+
+    // Add image modal functionality
+    window.openImageModal = function(imageUrl) {
+      const modal = document.getElementById('imageModal');
+      const modalImg = document.getElementById('modalImage');
+      modal.style.display = "block";
+      modalImg.src = imageUrl;
+    }
+
+    // Close modal
+    document.querySelector('.close-modal').addEventListener('click', () => {
+      document.getElementById('imageModal').style.display = "none";
+    });
+
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+      const modal = document.getElementById('imageModal');
+      if (event.target === modal) {
+        modal.style.display = "none";
+      }
+    }
+
+    // Load payments when page loads
+    document.addEventListener('DOMContentLoaded', loadPaymentHistory);
+  </script>
+</body>
+</html>

@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manage Students - Admin Dashboard</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    
+    .admin-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .back-button {
+      padding: 8px 16px;
+      background-color: #4A90E2;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    th, td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+
+    th {
+      background-color: #f5f5f5;
+    }
+
+    .stats-header {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .total-students {
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: #2563eb;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+    }
+
+    .modal-content {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      max-width: 500px;
+      margin: 50px auto;
+    }
+
+    .edit-form input, .edit-form select {
+      width: 100%;
+      padding: 8px;
+      margin: 8px 0;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 8px;
+    }
+
+    .edit-btn {
+      background: #4f46e5;
+      color: white;
+      padding: 4px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .delete-btn {
+      background: #dc2626;
+      color: white;
+      padding: 4px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .details-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      z-index: 1000;
+    }
+
+    .details-content {
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      max-width: 600px;
+      margin: 50px auto;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    .student-details {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+    }
+
+    .detail-item {
+      margin-bottom: 15px;
+    }
+
+    .detail-label {
+      font-weight: bold;
+      color: #666;
+      font-size: 0.9rem;
+    }
+
+    .detail-value {
+      font-size: 1.1rem;
+      color: #333;
+      margin-top: 4px;
+    }
+
+    .close-btn {
+      position: absolute;
+      right: 20px;
+      top: 20px;
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: #666;
+    }
+
+    .view-btn {
+      background: #3b82f6;
+      color: white;
+      padding: 4px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-right: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div class="admin-header">
+    <h1>Manage Students</h1>
+    <button class="back-button" onclick="window.location.href='index.html'">Back to Dashboard</button>
+  </div>
+
+  <div class="stats-header">
+    <div class="total-students">
+      Total Students: <span id="student-count">0</span>
+    </div>
+  </div>
+
+  <div class="overflow-x-auto">
+    <table class="min-w-full bg-white shadow-md rounded-lg">
+      <thead class="bg-gray-100">
+        <tr>
+          <th>Roll No</th>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Year</th>
+          <th>Branch</th>
+          <th>Total Fees</th>
+          <th>Paid</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="students-list"></tbody>
+    </table>
+  </div>
+
+  <!-- Edit Student Modal -->
+  <div id="editModal" class="modal">
+    <div class="modal-content">
+      <h2>Edit Student</h2>
+      <form id="editForm" class="edit-form">
+        <input type="hidden" id="edit-student-id">
+        <input type="text" id="edit-name" placeholder="Student Name" required>
+        <input type="email" id="edit-email" placeholder="Email" required readonly>
+        <input type="text" id="edit-rollno" placeholder="Roll Number" required>
+        <select id="edit-year" required>
+          <option value="">Select Year</option>
+          <option value="1">1st Year</option>
+          <option value="2">2nd Year</option>
+          <option value="3">3rd Year</option>
+          <option value="4">4th Year</option>
+        </select>
+        <select id="edit-branch" required>
+          <option value="">Select Branch</option>
+          <option value="CSE">Computer Science</option>
+          <option value="ECE">Electronics</option>
+          <option value="MECH">Mechanical</option>
+          <option value="CIVIL">Civil</option>
+        </select>
+        <input type="number" id="edit-fees" placeholder="Total Fees" required>
+        <div class="btn-group">
+          <button type="submit">Update</button>
+          <button type="button" onclick="closeEditModal()">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Student Details Modal -->
+  <div id="detailsModal" class="details-modal">
+    <div class="details-content">
+      <button class="close-btn" onclick="closeDetailsModal()">&times;</button>
+      <h2 style="margin-bottom: 20px; color: #333;">Student Details</h2>
+      <div class="student-details">
+        <!-- Details will be populated dynamically -->
+      </div>
+      <div style="margin-top: 20px; text-align: right;">
+        <button onclick="closeDetailsModal()" class="back-button">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.1.0/firebase-app.js";
+    import { getFirestore, collection, getDocs, doc, updateDoc, deleteDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.1.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      // ...your firebase config...
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    async function loadStudents() {
+      try {
+        const studentsSnapshot = await getDocs(collection(db, 'students'));
+        const studentsList = document.getElementById('students-list');
+        const studentCount = document.getElementById('student-count');
+        
+        studentsList.innerHTML = '';
+        let count = 0;
+
+        studentsSnapshot.forEach(doc => {
+          count++;
+          const student = doc.data();
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${student.rollNo || 'N/A'}</td>
+            <td>${student.name || 'N/A'}</td>
+            <td>${student.email || 'N/A'}</td>
+            <td>${student.year || 'N/A'} Year</td>
+            <td>${student.branch || 'N/A'}</td>
+            <td>₹${student.totalFees || 0}</td>
+            <td>₹${student.paidFees || 0}</td>
+            <td class="actions">
+              <button onclick="viewStudent('${doc.id}')" class="view-btn">View</button>
+              <button onclick="editStudent('${doc.id}')" class="edit-btn">Edit</button>
+              <button onclick="deleteStudent('${doc.id}', '${student.name}')" class="delete-btn">Delete</button>
+            </td>
+          `;
+          studentsList.appendChild(row);
+        });
+
+        studentCount.textContent = count;
+      } catch (error) {
+        console.error('Error loading students:', error);
+        alert('Error loading students: ' + error.message);
+      }
+    }
+
+    window.editStudent = async function(studentId, studentData) {
+      const modal = document.getElementById('editModal');
+      const form = document.getElementById('editForm');
+      
+      document.getElementById('edit-student-id').value = studentId;
+      document.getElementById('edit-name').value = studentData.name;
+      document.getElementById('edit-email').value = studentData.email;
+      document.getElementById('edit-rollno').value = studentData.rollNo;
+      document.getElementById('edit-year').value = studentData.year;
+      document.getElementById('edit-branch').value = studentData.branch;
+      document.getElementById('edit-fees').value = studentData.totalFees;
+
+      modal.style.display = 'block';
+    }
+
+    window.closeEditModal = function() {
+      document.getElementById('editModal').style.display = 'none';
+    }
+
+    document.getElementById('editForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const studentId = document.getElementById('edit-student-id').value;
+      
+      try {
+        const studentRef = doc(db, 'students', studentId);
+        await updateDoc(studentRef, {
+          name: document.getElementById('edit-name').value,
+          rollNo: document.getElementById('edit-rollno').value,
+          year: document.getElementById('edit-year').value,
+          branch: document.getElementById('edit-branch').value,
+          totalFees: Number(document.getElementById('edit-fees').value)
+        });
+
+        alert('Student updated successfully!');
+        closeEditModal();
+        loadStudents();
+      } catch (error) {
+        console.error('Error updating student:', error);
+        alert('Error updating student: ' + error.message);
+      }
+    });
+
+    window.confirmDelete = async function(studentId, studentName) {
+      if (confirm(`Are you sure you want to delete student: ${studentName}?`)) {
+        try {
+          await deleteDoc(doc(db, 'students', studentId));
+          alert('Student deleted successfully!');
+          loadStudents();
+        } catch (error) {
+          console.error('Error deleting student:', error);
+          alert('Error deleting student: ' + error.message);
+        }
+      }
+    }
+
+    window.viewDetails = function(studentId, studentData) {
+      const modal = document.getElementById('detailsModal');
+      const detailsContainer = modal.querySelector('.student-details');
+      
+      // Format the creation date
+      const createdAt = studentData.createdAt ? new Date(studentData.createdAt.seconds * 1000).toLocaleDateString() : 'N/A';
+      
+      // Calculate pending fees
+      const pendingFees = studentData.totalFees - (studentData.paidFees || 0);
+      
+      const details = `
+        <div class="detail-item">
+          <div class="detail-label">Name</div>
+          <div class="detail-value">${studentData.name}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Roll Number</div>
+          <div class="detail-value">${studentData.rollNo}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Email</div>
+          <div class="detail-value">${studentData.email}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Year</div>
+          <div class="detail-value">${studentData.year} Year</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Branch</div>
+          <div class="detail-value">${studentData.branch}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Total Fees</div>
+          <div class="detail-value">₹${studentData.totalFees}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Paid Fees</div>
+          <div class="detail-value">₹${studentData.paidFees || 0}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Pending Fees</div>
+          <div class="detail-value">₹${pendingFees}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Status</div>
+          <div class="detail-value">${studentData.status || 'Active'}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Created On</div>
+          <div class="detail-value">${createdAt}</div>
+        </div>
+      `;
+      
+      detailsContainer.innerHTML = details;
+      modal.style.display = 'block';
+    }
+
+    window.closeDetailsModal = function() {
+      document.getElementById('detailsModal').style.display = 'none';
+    }
+
+    // Close modals when clicking outside
+    window.onclick = function(event) {
+      const detailsModal = document.getElementById('detailsModal');
+      const editModal = document.getElementById('editModal');
+      if (event.target === detailsModal) {
+        detailsModal.style.display = 'none';
+      }
+      if (event.target === editModal) {
+        editModal.style.display = 'none';
+      }
+    }
+
+    window.viewStudent = async (studentId) => {
+      try {
+        const studentDoc = await getDoc(doc(db, 'students', studentId));
+        if (studentDoc.exists()) {
+          const student = studentDoc.data();
+          // Show student details in modal
+          document.getElementById('detailsModal').style.display = 'block';
+          document.querySelector('.student-details').innerHTML = `
+            <div class="detail-item">
+              <div class="detail-label">Name</div>
+              <div class="detail-value">${student.name}</div>
+            </div>
+            <!-- Add more details as needed -->
+          `;
+        }
+      } catch (error) {
+        console.error('Error viewing student:', error);
+        alert('Error viewing student details');
+      }
+    };
+
+    window.deleteStudent = async (studentId, studentName) => {
+      if (confirm(`Are you sure you want to delete ${studentName}?`)) {
+        try {
+          await deleteDoc(doc(db, 'students', studentId));
+          alert('Student deleted successfully');
+          loadStudents(); // Refresh the list
+        } catch (error) {
+          console.error('Error deleting student:', error);
+          alert('Error deleting student');
+        }
+      }
+    };
+
+    // Initialize the page
+    document.addEventListener('DOMContentLoaded', () => {
+      loadStudents();
+    });
+  </script>
+</body>
+</html>
